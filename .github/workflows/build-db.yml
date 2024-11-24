@@ -2,11 +2,10 @@ name: Build and Publish SQLite Database
 on:
   push:
     paths:
-      - "data.json" # Trigger when data.json is updated
+      - 'data.json'  # Trigger when data.json is updated
     branches:
       - main
 
-# Add permissions block
 permissions:
   contents: write
   pages: write
@@ -14,14 +13,14 @@ permissions:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-
+    
     steps:
       - uses: actions/checkout@v3
-
+      
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.x"
+          python-version: '3.x'
 
       - name: Create SQLite database
         run: |
@@ -59,6 +58,32 @@ jobs:
                 item["size"], item["ext"], item["ipfs_cid"]) for item in data]
           )
 
+          # Create FTS virtual table and indexes
+          cursor.execute("""
+          CREATE VIRTUAL TABLE books_fts USING fts5(title, author, content='books', content_rowid='id')
+          """)
+
+          cursor.execute("""
+          INSERT INTO books_fts(rowid, title, author)
+          SELECT id, title, author FROM books
+          """)
+
+          cursor.execute("""
+          CREATE INDEX idx_lang_ext ON books(lang, ext)
+          """)
+
+          cursor.execute("""
+          CREATE INDEX idx_lang ON books(lang)
+          """)
+
+          cursor.execute("""
+          CREATE INDEX idx_ext ON books(ext)
+          """)
+
+          cursor.execute("""
+          INSERT INTO books_fts(books_fts) VALUES ("optimize")
+          """)
+
           db.commit()
           db.close()
 
@@ -68,6 +93,9 @@ jobs:
           cursor.execute("SELECT COUNT(*) FROM books")
           count = cursor.fetchone()[0]
           print(f"Successfully created database with {count} records")
+          cursor.execute("SELECT COUNT(*) FROM books_fts")
+          fts_count = cursor.fetchone()[0]
+          print(f"FTS table contains {fts_count} searchable records")
           db.close()
           '
 
