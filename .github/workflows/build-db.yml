@@ -1,0 +1,92 @@
+name: Build and Publish SQLite Database
+on:
+  push:
+    paths:
+      - "data.json" # Trigger when data.json is updated
+    branches:
+      - main
+
+# Add permissions block
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Create SQLite database
+        run: |
+          python -c '
+          import json
+          import sqlite3
+          from pathlib import Path
+
+          # Read JSON file
+          with open("data.json", "r") as f:
+              data = json.load(f)
+
+          # Create database and table
+          db = sqlite3.connect("books.db")
+          cursor = db.cursor()
+
+          # Create the table
+          cursor.execute("""
+          CREATE TABLE IF NOT EXISTS books (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              title TEXT,
+              author TEXT,
+              year INTEGER,
+              lang TEXT,
+              size INTEGER,
+              ext TEXT,
+              ipfs_cid TEXT
+          )
+          """)
+
+          # Insert data
+          cursor.executemany(
+              "INSERT INTO books (title, author, year, lang, size, ext, ipfs_cid) VALUES (?, ?, ?, ?, ?, ?, ?)",
+              [(item["title"], item["author"], item["year"], item["lang"], 
+                item["size"], item["ext"], item["ipfs_cid"]) for item in data]
+          )
+
+          db.commit()
+          db.close()
+
+          # Print some statistics for the log
+          db = sqlite3.connect("books.db")
+          cursor = db.cursor()
+          cursor.execute("SELECT COUNT(*) FROM books")
+          count = cursor.fetchone()[0]
+          print(f"Successfully created database with {count} records")
+          db.close()
+          '
+
+      - name: Set up Git for GitHub Pages
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Push to gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git checkout --orphan gh-pages
+          git add books.db
+          git commit -m "Update SQLite database"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+
+      - name: Upload database as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: books-database
+          path: books.db

@@ -1,0 +1,11 @@
+[
+  {
+    "title": "testing",
+    "author": "author name",
+    "year": 1998,
+    "lang": "EN",
+    "size": "1000000",
+    "ext": "pdf",
+    "ipfs_cid": "abc"
+  }
+]
