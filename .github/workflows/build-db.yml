@@ -2,7 +2,8 @@ name: Build and Publish SQLite Database
 on:
   push:
     paths:
-      - 'data.json'  # Trigger when data.json is updated
+      - "data.json" # Trigger when data.json is updated
+      - ".github/workflows/build-db.yml" # Also trigger when workflow is updated
     branches:
       - main
 
@@ -13,14 +14,14 @@ permissions:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
       - name: Create SQLite database
         run: |
