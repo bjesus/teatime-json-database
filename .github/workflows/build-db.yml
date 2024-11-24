@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - "data.json" # Trigger when data.json is updated
+      - "config.json"
       - ".github/workflows/build-db.yml" # Also trigger when workflow is updated
     branches:
       - main
