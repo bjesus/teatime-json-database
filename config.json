@@ -4,6 +4,6 @@
     "requestChunkSize": 4096,
     "url": "https://bjesus.github.io/teatime-json-database/books.db"
   },
-  "images": "https://bjesus.github.io/teatime-json-database/covers/${ipfs_cid}.png",
+  "images": "https://bjesus.github.io/teatime-json-database/covers/{{ ipfs_cid }}.png",
   "tableName": "books"
 }
