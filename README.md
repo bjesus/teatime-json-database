@@ -1,6 +1,6 @@
-# Teatime JSON Database
+# TeaTime JSON Database
 
-This is an example [Teatime](https://github.com/bjesus/teatime/) database that is automatically generated from a JSON files. It uses GitHub Actions to create an SQLite file and then publishes it to GitHub Pages.
+This is an example [TeaTime](https://github.com/bjesus/teatime/) database that is automatically generated from a JSON files. It uses GitHub Actions to create an SQLite file and then publishes it to GitHub Pages.
 
 ## Usage
 
